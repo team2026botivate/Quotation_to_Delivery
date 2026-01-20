@@ -3,6 +3,7 @@ export interface StageConfig {
   title: string;
   subtitle: string;
   pendingColumns: string[];
+  historyColumns: string[];
   formFields: Array<{
     name: string;
     label: string;
@@ -20,7 +21,8 @@ export const stageConfigs: Record<StageKey, StageConfig> = {
     id: 'followup',
     title: 'Followup Customer',
     subtitle: 'Manage pending and completed records',
-    pendingColumns: ['Lead ID', 'Customer Name', 'Phone', 'Location', 'Requirement', 'Quotation Amount', 'Followup Status'],
+    pendingColumns: ['Lead ID', 'Customer Name', 'Phone', 'Location', 'Requirement', 'Quotation Amount'],
+    historyColumns: ['Lead ID', 'Customer Name', 'Status', 'What did customer say?', 'Need Call Date', 'Remark'],
     formFields: [
       { name: 'status', label: 'Status', type: 'select', required: true, options: [{ label: 'Interested', value: 'interested' }, { label: 'Not Interested', value: 'not_interested' }, { label: 'Need Time', value: 'need_time' }, { label: 'Confirmed', value: 'confirmed' }] },
       { name: 'notes', label: 'What did customer say?', type: 'textarea', placeholder: 'Enter customer response...' },
@@ -32,7 +34,8 @@ export const stageConfigs: Record<StageKey, StageConfig> = {
     id: 'stock',
     title: 'Check for Delivery From Stock',
     subtitle: 'Verify stock availability and delivery readiness',
-    pendingColumns: ['Lead ID', 'Customer Name', 'Item Required', 'Quantity', 'Stock Available', 'ETA'],
+    pendingColumns: ['Lead ID', 'Customer Name', 'Status', 'What did customer say?', 'Need Call Date', 'Remark'],
+    historyColumns: ['Lead ID', 'Customer Name', 'Stock Available', 'Available Quantity', 'Warehouse Location', 'Expected Dispatch Date', 'Remark'],
     formFields: [
       { name: 'stockAvailable', label: 'Stock Available', type: 'select', required: true, options: [{ label: 'Yes', value: 'yes' }, { label: 'No', value: 'no' }] },
       { name: 'quantity', label: 'Available Quantity', type: 'number', placeholder: 'Enter quantity' },
@@ -45,7 +48,8 @@ export const stageConfigs: Record<StageKey, StageConfig> = {
     id: 'po',
     title: 'Make PO',
     subtitle: 'Purchase Order creation and tracking',
-    pendingColumns: ['Lead ID', 'Customer Name', 'Vendor Name', 'Item Name', 'Qty', 'PO Status'],
+    pendingColumns: ['Lead ID', 'Customer Name', 'Stock Available', 'Available Quantity', 'Warehouse Location', 'Expected Dispatch Date', 'Remark'],
+    historyColumns: ['Lead ID', 'Customer Name', 'Vendor Name', 'PO Number', 'PO Date', 'Expected Delivery Date', 'Remark'],
     formFields: [
       { name: 'vendor', label: 'Vendor Name', type: 'text', required: true, placeholder: 'Enter vendor name' },
       { name: 'poNumber', label: 'PO Number', type: 'text', required: true, placeholder: 'Enter PO number' },
@@ -58,7 +62,8 @@ export const stageConfigs: Record<StageKey, StageConfig> = {
     id: 'delivery',
     title: 'Truck Delivery',
     subtitle: 'Track truck and driver information for delivery',
-    pendingColumns: ['Lead ID', 'Customer Name', 'Truck Number', 'Driver Name', 'Dispatch Date', 'Status'],
+    pendingColumns: ['Lead ID', 'Customer Name', 'Vendor Name', 'PO Number', 'PO Date', 'Expected Delivery Date', 'Remark'],
+    historyColumns: ['Lead ID', 'Customer Name', 'Truck Number', 'Driver Name', 'Driver Contact', 'Dispatch Date', 'Delivery ETA', 'Remark'],
     formFields: [
       { name: 'truckNumber', label: 'Truck Number', type: 'text', required: true, placeholder: 'Enter truck number' },
       { name: 'driverName', label: 'Driver Name', type: 'text', required: true, placeholder: 'Enter driver name' },
@@ -72,7 +77,8 @@ export const stageConfigs: Record<StageKey, StageConfig> = {
     id: 'receiving',
     title: 'Receiving Stock',
     subtitle: 'Record material receipt and damage assessment',
-    pendingColumns: ['Lead ID', 'Customer Name', 'Material Name', 'Received Qty', 'Damage', 'Status'],
+    pendingColumns: ['Lead ID', 'Customer Name', 'Truck Number', 'Driver Name', 'Driver Contact', 'Dispatch Date', 'Delivery ETA', 'Remark'],
+    historyColumns: ['Lead ID', 'Customer Name', 'Received Quantity', 'Damage', 'Damage Notes', 'Received Date', 'Remark'],
     formFields: [
       { name: 'receivedQty', label: 'Received Quantity', type: 'number', required: true, placeholder: 'Enter quantity received' },
       { name: 'hasDamage', label: 'Damage', type: 'select', required: true, options: [{ label: 'Yes', value: 'yes' }, { label: 'No', value: 'no' }] },
@@ -85,7 +91,8 @@ export const stageConfigs: Record<StageKey, StageConfig> = {
     id: 'dispatch-plan',
     title: 'Dispatch Planning for Customer',
     subtitle: 'Plan dispatch schedule and team assignment',
-    pendingColumns: ['Lead ID', 'Customer Name', 'Planned Date', 'Time Slot', 'Team Assigned', 'Status'],
+    pendingColumns: ['Lead ID', 'Customer Name', 'Received Quantity', 'Damage', 'Damage Notes', 'Received Date', 'Remark'],
+    historyColumns: ['Lead ID', 'Customer Name', 'Planned Dispatch Date', 'Time Slot', 'Team Assigned', 'Remark'],
     formFields: [
       { name: 'plannedDate', label: 'Planned Dispatch Date', type: 'date', required: true },
       { name: 'timeSlot', label: 'Time Slot', type: 'select', required: true, options: [{ label: 'Morning', value: 'morning' }, { label: 'Afternoon', value: 'afternoon' }, { label: 'Evening', value: 'evening' }] },
@@ -97,7 +104,8 @@ export const stageConfigs: Record<StageKey, StageConfig> = {
     id: 'dispatch',
     title: 'Dispatch',
     subtitle: 'Dispatch with image and video proof',
-    pendingColumns: ['Lead ID', 'Customer Name', 'Dispatch Date', 'Vehicle', 'Proof Uploaded', 'Status'],
+    pendingColumns: ['Lead ID', 'Customer Name', 'Planned Dispatch Date', 'Time Slot', 'Team Assigned', 'Remark'],
+    historyColumns: ['Lead ID', 'Customer Name', 'Dispatch Date', 'Vehicle Number', 'Remark'],
     formFields: [
       { name: 'dispatchDate', label: 'Dispatch Date', type: 'date', required: true },
       { name: 'vehicleNumber', label: 'Vehicle Number', type: 'text', required: true, placeholder: 'Enter vehicle number' },
@@ -110,7 +118,8 @@ export const stageConfigs: Record<StageKey, StageConfig> = {
     id: 'confirmation',
     title: 'Receiving Confirmation',
     subtitle: 'Confirm delivery and note any issues',
-    pendingColumns: ['Lead ID', 'Customer Name', 'Delivered Date', 'Customer Confirmation', 'Status'],
+    pendingColumns: ['Lead ID', 'Customer Name', 'Dispatch Date', 'Vehicle Number', 'Remark'],
+    historyColumns: ['Lead ID', 'Customer Name', 'Delivered Date', 'Customer Confirmation', 'Any Issue', 'Remark'],
     formFields: [
       { name: 'deliveredDate', label: 'Delivered Date', type: 'date', required: true },
       { name: 'confirmed', label: 'Customer Confirmation', type: 'select', required: true, options: [{ label: 'Yes', value: 'yes' }, { label: 'No', value: 'no' }] },
@@ -122,7 +131,8 @@ export const stageConfigs: Record<StageKey, StageConfig> = {
     id: 'installation',
     title: 'Send to Installation',
     subtitle: 'Assign installer and schedule installation',
-    pendingColumns: ['Lead ID', 'Customer Name', 'Installer Name', 'Installation Date', 'Status'],
+    pendingColumns: ['Lead ID', 'Customer Name', 'Delivered Date', 'Customer Confirmation', 'Any Issue', 'Remark'],
+    historyColumns: ['Lead ID', 'Customer Name', 'Installer Name', 'Installer Contact', 'Installation Date', 'Remark'],
     formFields: [
       { name: 'installerName', label: 'Installer Name', type: 'text', required: true, placeholder: 'Enter installer name' },
       { name: 'installerContact', label: 'Installer Contact', type: 'text', placeholder: 'Enter contact number' },
@@ -134,7 +144,8 @@ export const stageConfigs: Record<StageKey, StageConfig> = {
     id: 'install-material',
     title: 'Install to Material',
     subtitle: 'Track installation progress and completion',
-    pendingColumns: ['Lead ID', 'Customer Name', 'Work Done %', 'Installation Status'],
+    pendingColumns: ['Lead ID', 'Customer Name', 'Installer Name', 'Installer Contact', 'Installation Date', 'Remark'],
+    historyColumns: ['Lead ID', 'Customer Name', 'Work Done %', 'Installation Status', 'Issue Notes', 'Remark'],
     formFields: [
       { name: 'workDone', label: 'Work Done %', type: 'slider' },
       { name: 'installStatus', label: 'Installation Status', type: 'select', required: true, options: [{ label: 'Completed', value: 'completed' }, { label: 'Partial', value: 'partial' }, { label: 'Pending', value: 'pending' }] },
@@ -146,7 +157,8 @@ export const stageConfigs: Record<StageKey, StageConfig> = {
     id: 'payment',
     title: 'Payment Collection',
     subtitle: 'Track payment status and collection',
-    pendingColumns: ['Lead ID', 'Customer Name', 'Total Amount', 'Paid Amount', 'Balance', 'Payment Status'],
+    pendingColumns: ['Lead ID', 'Customer Name', 'Work Done %', 'Installation Status', 'Issue Notes', 'Remark'],
+    historyColumns: ['Lead ID', 'Customer Name', 'Paid Amount', 'Payment Mode', 'Payment Date', 'Transaction Reference', 'Remark'],
     formFields: [
       { name: 'paidAmount', label: 'Paid Amount', type: 'number', required: true, placeholder: 'Enter amount paid' },
       { name: 'paymentMode', label: 'Payment Mode', type: 'select', required: true, options: [{ label: 'Cash', value: 'cash' }, { label: 'UPI', value: 'upi' }, { label: 'Bank Transfer', value: 'bank' }] },

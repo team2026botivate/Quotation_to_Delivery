@@ -11,13 +11,8 @@ import UpdateModal from '@/components/UpdateModal';
 import { stageConfigs, StageConfig } from '@/lib/stageConfigs';
 import { Search } from 'lucide-react';
 
-type StageType = 'followup' | 'stock' | 'po' | 'delivery' | 'receiving' | 'dispatch-plan' | 'dispatch' | 'confirmation' | 'installation' | 'install-material' | 'payment';
-
-interface StageScreenProps {
-  stage: StageType;
-}
-
-export default function StageScreen({ stage }: StageScreenProps) {
+export default function StockStage() {
+  const stage = 'stock';
   const { state, dispatch } = useWorkflow();
   const config = stageConfigs[stage] as StageConfig;
   const [searchTerm, setSearchTerm] = useState('');
@@ -59,6 +54,42 @@ export default function StageScreen({ stage }: StageScreenProps) {
       'Work Done %': 'workDone',
       'Paid Amount': 'paidAmount',
       'Balance': 'balance',
+      'Status': 'status',
+      'What did customer say?': 'notes',
+      'Need Call Date': 'callDate',
+      'Remark': 'remark',
+      'Stock Available': 'stockAvailable',
+      'Available Quantity': 'quantity',
+      'Warehouse Location': 'warehouse',
+      'Expected Dispatch Date': 'dispatchDate',
+      'Vendor Name': 'vendor',
+      'PO Number': 'poNumber',
+      'PO Date': 'poDate',
+      'Expected Delivery Date': 'deliveryDate',
+      'Truck Number': 'truckNumber',
+      'Driver Name': 'driverName',
+      'Driver Contact': 'driverContact',
+      'Dispatch Date': 'dispatchDate',
+      'Delivery ETA': 'deliveryEta',
+      'Received Quantity': 'receivedQty',
+      'Damage': 'hasDamage',
+      'Damage Notes': 'damageNotes',
+      'Received Date': 'receivedDate',
+      'Planned Dispatch Date': 'plannedDate',
+      'Time Slot': 'timeSlot',
+      'Team Assigned': 'teamAssigned',
+      'Vehicle Number': 'vehicleNumber',
+      'Delivered Date': 'deliveredDate',
+      'Customer Confirmation': 'confirmed',
+      'Any Issue': 'issues',
+      'Installer Name': 'installerName',
+      'Installer Contact': 'installerContact',
+      'Installation Date': 'installDate',
+      'Installation Status': 'installStatus',
+      'Issue Notes': 'issueNotes',
+      'Payment Mode': 'paymentMode',
+      'Payment Date': 'paymentDate',
+      'Transaction Reference': 'reference',
     };
 
     const key = columnMap[columnName];
@@ -123,12 +154,7 @@ export default function StageScreen({ stage }: StageScreenProps) {
           </TabsList>
 
           <TabsContent value="pending" className="space-y-4">
-            {pendingItems.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">No pending items</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto -mx-6 md:mx-0">
+            <div className="overflow-x-auto -mx-6 md:mx-0">
                 <table className="w-full text-xs md:text-sm">
                   <thead>
                     <tr className="border-b border-border bg-muted/50">
@@ -141,7 +167,14 @@ export default function StageScreen({ stage }: StageScreenProps) {
                     </tr>
                   </thead>
                   <tbody>
-                    {pendingItems.map((item) => (
+                    {pendingItems.length === 0 ? (
+                      <tr>
+                        <td colSpan={config.pendingColumns.length + 1} className="text-center py-12 text-muted-foreground">
+                          No pending items
+                        </td>
+                      </tr>
+                    ) : (
+                      pendingItems.map((item) => (
                       <tr key={item.id} className="border-b border-border hover:bg-muted/30 transition-colors">
                         {config.pendingColumns.map((col) => {
                           const cellValue = getColumnValue(item, col);
@@ -164,24 +197,18 @@ export default function StageScreen({ stage }: StageScreenProps) {
                           </Button>
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
+                    ))
+                    )}</tbody>
                 </table>
               </div>
-            )}
           </TabsContent>
 
           <TabsContent value="history" className="space-y-4">
-            {historyItems.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">No history items</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto -mx-6 md:mx-0">
+            <div className="overflow-x-auto -mx-6 md:mx-0">
                 <table className="w-full text-xs md:text-sm">
                   <thead>
                     <tr className="border-b border-border bg-muted/50">
-                      {config.pendingColumns.map((col) => (
+                      {config.historyColumns.map((col) => (
                         <th key={col} className="text-left py-2 md:py-3 px-2 md:px-4 font-semibold text-foreground">
                           {col}
                         </th>
@@ -190,9 +217,16 @@ export default function StageScreen({ stage }: StageScreenProps) {
                     </tr>
                   </thead>
                   <tbody>
-                    {historyItems.map((item) => (
+                    {historyItems.length === 0 ? (
+                      <tr>
+                        <td colSpan={config.historyColumns.length + 1} className="text-center py-12 text-muted-foreground">
+                          No history items
+                        </td>
+                      </tr>
+                    ) : (
+                      historyItems.map((item) => (
                       <tr key={item.id} className="border-b border-border hover:bg-muted/30 transition-colors">
-                        {config.pendingColumns.map((col) => {
+                        {config.historyColumns.map((col) => {
                           const cellValue = getColumnValue(item, col);
                           return (
                             <td key={col} className="py-2 md:py-3 px-2 md:px-4 text-foreground">
@@ -204,11 +238,10 @@ export default function StageScreen({ stage }: StageScreenProps) {
                           <Badge className="bg-green-100 text-green-800 text-xs">Completed</Badge>
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
+                    ))
+                    )}</tbody>
                 </table>
               </div>
-            )}
           </TabsContent>
         </Tabs>
       </Card>

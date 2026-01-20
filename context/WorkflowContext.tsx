@@ -30,7 +30,8 @@ type WorkflowAction =
   | { type: 'ADD_ITEM'; payload: WorkflowItem }
   | { type: 'UPDATE_ITEM'; payload: WorkflowItem }
   | { type: 'MOVE_TO_NEXT_STAGE'; payload: { id: string; currentStage: string; data: any } }
-  | { type: 'ADD_ACTIVITY'; payload: { customerName: string; action: string; stage: string } };
+  | { type: 'ADD_ACTIVITY'; payload: { customerName: string; action: string; stage: string } }
+  | { type: 'LOAD_STATE'; payload: WorkflowState };
 
 const WorkflowContext = createContext<
   | {
@@ -47,6 +48,9 @@ const initialState: WorkflowState = {
 
 function workflowReducer(state: WorkflowState, action: WorkflowAction): WorkflowState {
   switch (action.type) {
+    case 'LOAD_STATE':
+      return action.payload;
+
     case 'ADD_ITEM': {
       return {
         ...state,
@@ -121,6 +125,26 @@ function workflowReducer(state: WorkflowState, action: WorkflowAction): Workflow
 
 export function WorkflowProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(workflowReducer, initialState);
+
+  // Load state from local storage on mount
+  React.useEffect(() => {
+    const savedState = localStorage.getItem('workflowState');
+    if (savedState) {
+      try {
+        const parsedState = JSON.parse(savedState);
+        dispatch({ type: 'LOAD_STATE', payload: parsedState });
+      } catch (error) {
+        console.error('Failed to parse workflow state from local storage:', error);
+      }
+    }
+  }, []);
+
+  // Save state to local storage whenever it changes
+  React.useEffect(() => {
+    if (state !== initialState) {
+        localStorage.setItem('workflowState', JSON.stringify(state));
+    }
+  }, [state]);
 
   return (
     <WorkflowContext.Provider value={{ state, dispatch }}>
