@@ -17,6 +17,7 @@ import {
   LogOut,
   Star,
 } from "lucide-react";
+import Image from "next/image";
 
 type StageType =
   | "home"
@@ -75,8 +76,11 @@ export default function Sidebar({ currentStage, onStageChange, onLogout, role }:
   return (
     <div className="hidden md:flex w-64 bg-sidebar border-r border-sidebar-border overflow-hidden h-screen flex-col">
       <div className="p-4 border-b border-sidebar-border bg-sidebar flex flex-col items-center text-center">
-        <img 
-          src="/logo.png" 
+        <Image 
+          loading='lazy'
+          width={100}
+          height={100}
+          src="./logo.png" 
           alt="ELEM Logo" 
           className="h-14 w-14 object-cover rounded-full mb-2 border border-sidebar-border shadow-sm"
         />
