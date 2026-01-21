@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
+import Image from 'next/image';
 
 interface LoginPageProps {
   onLogin: (role: string) => void;
@@ -37,7 +38,10 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
     <div className="min-h-screen w-full flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md shadow-lg border border-border">
         <CardHeader className="space-y-1 text-center pb-8 flex flex-col items-center">
-          <img 
+          <Image
+          loading='lazy'
+            width={100}
+            height={100}
             src="/logo.png" 
             alt="ELEM Logo" 
             className="h-24 w-24 object-cover rounded-full mb-4 shadow-sm border border-border"
