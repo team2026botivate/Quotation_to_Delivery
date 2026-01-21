@@ -11,8 +11,8 @@ import UpdateModal from '@/components/UpdateModal';
 import { stageConfigs, StageConfig } from '@/lib/stageConfigs';
 import { Search } from 'lucide-react';
 
-export default function InstallMaterialStage() {
-  const stage = 'install-material';
+export default function CustomerReviewStage() {
+  const stage = 'customer-review';
   const { state, dispatch } = useWorkflow();
   const config = stageConfigs[stage] as StageConfig;
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,7 +20,7 @@ export default function InstallMaterialStage() {
   const [showModal, setShowModal] = useState(false);
 
   if (!config) {
-    return <div className="p-8">Stage not found</div>;
+    return <div className="p-4">Stage not found</div>;
   }
 
   const pendingItems = state.items.filter(
@@ -92,6 +92,9 @@ export default function InstallMaterialStage() {
       'Payment Mode': 'paymentMode',
       'Payment Date': 'paymentDate',
       'Transaction Reference': 'reference',
+      // New fields for Customer Review
+      'Rating': 'rating',
+      'Review note': 'reviewNotes',
     };
 
     const key = columnMap[columnName];

@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { WorkflowItem } from '@/context/WorkflowContext';
 import { StageConfig } from '@/lib/stageConfigs';
-import { X } from 'lucide-react';
+import { X, Star } from 'lucide-react';
 
 interface UpdateModalProps {
   item: WorkflowItem;
@@ -35,11 +35,8 @@ export default function UpdateModal({ item, stage, config, isOpen, onClose, onSu
     const files = event.target.files;
     if (files && files.length > 0) {
       const currentFiles = formData[name] || [];
-      const remainingSlots = 5 - currentFiles.length;
       
-      if (remainingSlots <= 0) return;
-
-      const newFiles = Array.from(files).slice(0, remainingSlots).map(file => ({
+      const newFiles = Array.from(files).map(file => ({
         name: file.name,
         url: URL.createObjectURL(file)
       }));
@@ -62,14 +59,14 @@ export default function UpdateModal({ item, stage, config, isOpen, onClose, onSu
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl">
-        <DialogHeader>
-          <DialogTitle>Update {config.title}</DialogTitle>
-          <DialogDescription>
+        <DialogHeader className="space-y-1">
+          <DialogTitle className="text-lg">Update {config.title}</DialogTitle>
+          <DialogDescription className="text-xs">
             Customer: <span className="font-semibold text-foreground">{item.customerName}</span>
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4 max-h-96 overflow-y-auto">
+        <div className="space-y-3 py-2 max-h-[70vh] overflow-y-auto">
           {config.formFields.map((field) => {
             const isCallDate = field.name === 'callDate';
             const showCallDate = isCallDate ? formData['status'] === 'need_time' : true;
@@ -78,7 +75,7 @@ export default function UpdateModal({ item, stage, config, isOpen, onClose, onSu
 
             return (
             <div key={field.name} className="space-y-2">
-              <Label htmlFor={field.name} className="text-foreground">
+              <Label htmlFor={field.name} className="text-foreground text-xs font-medium">
                 {field.label}
                 {field.required && <span className="text-destructive ml-1">*</span>}
               </Label>
@@ -89,7 +86,7 @@ export default function UpdateModal({ item, stage, config, isOpen, onClose, onSu
                   placeholder={field.placeholder}
                   value={formData[field.name] || ''}
                   onChange={(e) => handleInputChange(field.name, e.target.value)}
-                  className="border-border"
+                  className="border-border h-8 text-xs"
                 />
               )}
 
@@ -100,7 +97,7 @@ export default function UpdateModal({ item, stage, config, isOpen, onClose, onSu
                   placeholder={field.placeholder}
                   value={formData[field.name] || ''}
                   onChange={(e) => handleInputChange(field.name, e.target.value)}
-                  className="border-border"
+                  className="border-border h-8 text-xs"
                 />
               )}
 
@@ -110,8 +107,8 @@ export default function UpdateModal({ item, stage, config, isOpen, onClose, onSu
                   placeholder={field.placeholder}
                   value={formData[field.name] || ''}
                   onChange={(e) => handleInputChange(field.name, e.target.value)}
-                  className="border-border"
-                  rows={3}
+                  className="border-border text-xs"
+                  rows={2}
                 />
               )}
 
@@ -121,18 +118,18 @@ export default function UpdateModal({ item, stage, config, isOpen, onClose, onSu
                   type="date"
                   value={formData[field.name] || ''}
                   onChange={(e) => handleInputChange(field.name, e.target.value)}
-                  className="border-border"
+                  className="border-border h-8 text-xs"
                 />
               )}
 
               {field.type === 'select' && (
                 <Select value={formData[field.name] || ''} onValueChange={(value) => handleInputChange(field.name, value)}>
-                  <SelectTrigger className="border-border">
+                  <SelectTrigger className="border-border h-8 text-xs">
                     <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
                   </SelectTrigger>
                   <SelectContent>
                     {field.options?.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
+                      <SelectItem key={option.value} value={option.value} className="text-[10px]">
                         {option.label}
                       </SelectItem>
                     ))}
@@ -162,7 +159,7 @@ export default function UpdateModal({ item, stage, config, isOpen, onClose, onSu
                     }}
                     type="file"
                     multiple
-                    accept={field.label.toLowerCase().includes('video') ? 'video/*' : 'image/*'}
+                    accept={field.label.toLowerCase().includes('video') ? 'video/*' : field.label.toLowerCase().includes('image') ? 'image/*' : '*/*'}
                     onChange={(e) => handleFileUpload(field.name, e)}
                     className="hidden"
                   />
@@ -170,36 +167,41 @@ export default function UpdateModal({ item, stage, config, isOpen, onClose, onSu
                     type="button"
                     variant="outline"
                     onClick={() => fileInputs.current[field.name]?.click()}
-                    className="w-full border-border h-12 border-dashed"
-                    disabled={
-                        formData[field.name]?.length >= 5
-                    }
+                    className="w-full border-border h-10 border-dashed text-xs"
                   >
-                    {formData[field.name]?.length >= 5 
-                        ? 'Maximum 5 files reached' 
-                        : `Upload ${field.label.includes('Video') ? 'Videos' : 'Images'} (Max 5)`}
+                    {`Upload ${field.label}`}
                   </Button>
 
                   {/* File Preview Grid */}
                   {formData[field.name]?.length > 0 && (
                     <div className="grid grid-cols-5 gap-2">
-                      {formData[field.name].map((file: any, index: number) => (
+                      {formData[field.name].map((file: any, index: number) => {
+                        const isVideo = file.name.match(/\.(mp4|webm|ogg)$/i) || field.label.toLowerCase().includes('video');
+                        const isImage = file.name.match(/\.(jpg|jpeg|png|gif|webp)$/i) || field.label.toLowerCase().includes('image');
+                        
+                        return (
                         <div key={index} className="relative group bg-muted/40 rounded-lg p-1.5 border border-border">
-                            {field.label.toLowerCase().includes('video') ? (
+                            {isVideo ? (
                                 <video
                                     src={file.url}
                                     controls
                                     className="w-full h-16 object-cover rounded-md"
                                 />
-                            ) : (
+                            ) : isImage ? (
                                 <img
                                     src={file.url || "/placeholder.svg"}
                                     alt="preview"
                                     className="w-full h-16 object-cover rounded-md"
                                 />
+                            ) : (
+                                <div className="w-full h-16 bg-muted flex items-center justify-center rounded-md border border-border">
+                                    <span className="text-xs font-medium text-muted-foreground uppercase">
+                                        {file.name.split('.').pop() || 'FILE'}
+                                    </span>
+                                </div>
                             )}
                             <div className="mt-1 flex items-center justify-between">
-                                <span className="text-[10px] text-muted-foreground truncate max-w-[60px]">
+                                <span className="text-[10px] text-muted-foreground truncate max-w-[60px]" title={file.name}>
                                     {file.name}
                                 </span>
                                 <Button
@@ -213,7 +215,7 @@ export default function UpdateModal({ item, stage, config, isOpen, onClose, onSu
                                 </Button>
                             </div>
                         </div>
-                      ))}
+                      )})}
                     </div>
                   )}
                 </div>
@@ -233,16 +235,37 @@ export default function UpdateModal({ item, stage, config, isOpen, onClose, onSu
                   </label>
                 </div>
               )}
+
+              {field.type === 'star-rating' && (
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => handleInputChange(field.name, star)}
+                      className="focus:outline-none transition-transform hover:scale-110"
+                    >
+                      <Star
+                        className={`w-8 h-8 ${
+                          (formData[field.name] || 0) >= star
+                            ? 'fill-yellow-400 text-yellow-400'
+                            : 'text-muted-foreground'
+                        }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
             );
           })}
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} className="border-border bg-transparent">
+        <DialogFooter className="gap-2 sm:gap-0 mt-2">
+          <Button variant="outline" onClick={onClose} className="border-border bg-transparent h-8 text-xs">
             Cancel
           </Button>
-          <Button onClick={handleSubmit} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+          <Button onClick={handleSubmit} className="bg-primary hover:bg-primary/90 text-primary-foreground h-8 text-xs">
             Submit
           </Button>
         </DialogFooter>

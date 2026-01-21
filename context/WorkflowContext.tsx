@@ -81,11 +81,20 @@ function workflowReducer(state: WorkflowState, action: WorkflowAction): Workflow
         'confirmation',
         'installation',
         'install-material',
+        'customer-review',
         'payment',
         'completed',
       ];
-      const currentIndex = stages.indexOf(currentStage);
-      const nextStage = currentIndex < stages.length - 1 ? stages[currentIndex + 1] : currentStage;
+      let nextStage;
+      // Special logic for Stock stage: If stock is available ('yes'), jump to Dispatch Planning
+      if (currentStage === 'stock' && data.stockAvailable === 'yes') {
+        nextStage = 'dispatch-plan';
+      } else if (currentStage === 'confirmation' && data.confirmed === 'no') {
+        nextStage = 'payment';
+      } else {
+        const currentIndex = stages.indexOf(currentStage);
+        nextStage = currentIndex < stages.length - 1 ? stages[currentIndex + 1] : currentStage;
+      }
 
       return {
         ...state,

@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
 
 interface LoginPageProps {
-  onLogin: () => void;
+  onLogin: (role: string) => void;
 }
 
 export default function LoginPage({ onLogin }: LoginPageProps) {
@@ -23,25 +23,25 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
     setError('');
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      // Allow any credentials for testing
-      if (email && password) {
-        onLogin();
-      } else {
-        setError('Please enter both email and password.');
-        setIsLoading(false);
-      }
-    }, 1000);
+    if (email === 'admin' && password === 'admin123') {
+      onLogin('admin');
+    } else if (email === 'user' && password === 'user123') {
+      onLogin('user');
+    } else {
+      setError('Invalid username or password');
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md shadow-lg border border-border">
-        <CardHeader className="space-y-1 text-center pb-8">
-          <CardTitle className="text-3xl font-bold tracking-tight text-foreground">
-            Q2D System
-          </CardTitle>
+        <CardHeader className="space-y-1 text-center pb-8 flex flex-col items-center">
+          <img 
+            src="/logo.png" 
+            alt="ELEM Logo" 
+            className="h-24 w-24 object-cover rounded-full mb-4 shadow-sm border border-border"
+          />
           <CardDescription className="text-base text-muted-foreground">
             Enter your credentials to access the dashboard
           </CardDescription>
@@ -49,7 +49,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
         <CardContent className="px-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email">Email / Username</Label>
+              <Label htmlFor="email">Username</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -103,8 +103,11 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex justify-center py-4">
+        <CardFooter className="flex flex-col gap-2 justify-center py-4 text-center">
           <p className="text-xs text-muted-foreground">
+            admin/admin123 & user/user123
+          </p>
+          <p className="text-sm font-bold text-primary tracking-wide">
             Powered By Botivate
           </p>
         </CardFooter>

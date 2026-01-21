@@ -27,6 +27,7 @@ const stages = [
   'confirmation',
   'installation',
   'install-material',
+  'customer-review',
   'payment'
 ];
 
