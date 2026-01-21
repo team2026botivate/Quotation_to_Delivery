@@ -30,6 +30,7 @@ type WorkflowAction =
   | { type: 'ADD_ITEM'; payload: WorkflowItem }
   | { type: 'UPDATE_ITEM'; payload: WorkflowItem }
   | { type: 'MOVE_TO_NEXT_STAGE'; payload: { id: string; currentStage: string; data: any } }
+  | { type: 'LOG_STAGE_ACTION'; payload: { id: string; stage: string; data: any } }
   | { type: 'ADD_ACTIVITY'; payload: { customerName: string; action: string; stage: string } }
   | { type: 'LOAD_STATE'; payload: WorkflowState };
 
@@ -81,6 +82,7 @@ function workflowReducer(state: WorkflowState, action: WorkflowAction): Workflow
         'installation',
         'install-material',
         'payment',
+        'completed',
       ];
       const currentIndex = stages.indexOf(currentStage);
       const nextStage = currentIndex < stages.length - 1 ? stages[currentIndex + 1] : currentStage;
@@ -96,7 +98,30 @@ function workflowReducer(state: WorkflowState, action: WorkflowAction): Workflow
             };
             return {
               ...item,
+              ...data, // Merge new data into item properties
               currentStage: nextStage,
+              stageLogs: [...item.stageLogs, newLog],
+            };
+          }
+          return item;
+        }),
+      };
+    }
+
+    case 'LOG_STAGE_ACTION': {
+      const { id, stage, data } = action.payload;
+      return {
+        ...state,
+        items: state.items.map((item) => {
+          if (item.id === id) {
+            const newLog: StageLog = {
+              stage,
+              timestamp: new Date().toISOString(),
+              data,
+            };
+            return {
+              ...item,
+              ...data, // Merge new data into item properties
               stageLogs: [...item.stageLogs, newLog],
             };
           }
@@ -128,7 +153,7 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
 
   // Load state from local storage on mount
   React.useEffect(() => {
-    const savedState = localStorage.getItem('workflowState');
+    const savedState = localStorage.getItem('workflowState_v2');
     if (savedState) {
       try {
         const parsedState = JSON.parse(savedState);
@@ -142,7 +167,7 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
   // Save state to local storage whenever it changes
   React.useEffect(() => {
     if (state !== initialState) {
-        localStorage.setItem('workflowState', JSON.stringify(state));
+        localStorage.setItem('workflowState_v2', JSON.stringify(state));
     }
   }, [state]);
 

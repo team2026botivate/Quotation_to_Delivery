@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
+import LoginPage from '@/components/LoginPage';
 import DashboardHome from '@/components/DashboardHome';
 import FollowupStage from '@/components/stages/FollowupStage';
 import StockStage from '@/components/stages/StockStage';
@@ -26,7 +27,7 @@ function HomeContent() {
 
   useEffect(() => {
     if (!initialized && state.items.length === 0) {
-      const savedState = localStorage.getItem('workflowState');
+      const savedState = localStorage.getItem('workflowState_v2');
       if (!savedState) {
         const dummyData = generateDummyData();
         dummyData.forEach((item) => {
@@ -40,9 +41,38 @@ function HomeContent() {
     }
   }, [dispatch, initialized, state.items.length]);
 
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authInitialized, setAuthInitialized] = useState(false);
+
+  useEffect(() => {
+    const authStatus = localStorage.getItem('isAuthenticated');
+    if (authStatus === 'true') {
+      setIsAuthenticated(true);
+    }
+    setAuthInitialized(true);
+  }, []);
+
+  const handleLogin = () => {
+    localStorage.setItem('isAuthenticated', 'true');
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated');
+    setIsAuthenticated(false);
+  };
+
+  if (!authInitialized) {
+    return null; // Or a loading spinner
+  }
+
+  if (!isAuthenticated) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
+
   return (
     <div className="flex flex-col md:flex-row h-screen bg-background text-foreground">
-      <Sidebar currentStage={currentStage} onStageChange={setCurrentStage} />
+      <Sidebar currentStage={currentStage} onStageChange={setCurrentStage} onLogout={handleLogout} />
       <main className="flex-1 overflow-auto min-h-screen md:min-h-0">
         {currentStage === 'home' && <DashboardHome />}
         {currentStage === 'followup' && <FollowupStage />}

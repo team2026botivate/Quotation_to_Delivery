@@ -31,8 +31,7 @@ export default function FollowupStage() {
   const historyItems = state.items.filter(
     (item) =>
       item.stageLogs.some((log) => log.stage === stage) &&
-      item.customerName.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      item.currentStage !== stage
+      item.customerName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getColumnValue = (item: WorkflowItem, columnName: string): any => {
@@ -56,7 +55,9 @@ export default function FollowupStage() {
       'Balance': 'balance',
       'Status': 'status',
       'What did customer say?': 'notes',
-      'Need Call Date': 'callDate',
+      'Need Time Date': 'callDate',
+      'Upload Image': 'image',
+      'Upload Video': 'video',
       'Remark': 'remark',
       'Stock Available': 'stockAvailable',
       'Available Quantity': 'quantity',
@@ -66,9 +67,9 @@ export default function FollowupStage() {
       'PO Number': 'poNumber',
       'PO Date': 'poDate',
       'Expected Delivery Date': 'deliveryDate',
-      'Truck Number': 'truckNumber',
-      'Driver Name': 'driverName',
-      'Driver Contact': 'driverContact',
+      'Tracking Number': 'truckNumber',
+      'Transporter Name': 'driverName',
+      'Contact Number': 'driverContact',
       'Dispatch Date': 'dispatchDate',
       'Delivery ETA': 'deliveryEta',
       'Received Quantity': 'receivedQty',
@@ -102,14 +103,25 @@ export default function FollowupStage() {
   };
 
   const handleUpdate = (item: WorkflowItem, data: any) => {
-    dispatch({
-      type: 'MOVE_TO_NEXT_STAGE',
-      payload: {
-        id: item.id,
-        currentStage: stage,
-        data,
-      },
-    });
+    if (data.status === 'follow_up' || data.status === 'need_time') {
+      dispatch({
+        type: 'LOG_STAGE_ACTION',
+        payload: {
+          id: item.id,
+          stage: stage,
+          data,
+        },
+      });
+    } else {
+      dispatch({
+        type: 'MOVE_TO_NEXT_STAGE',
+        payload: {
+          id: item.id,
+          currentStage: stage,
+          data,
+        },
+      });
+    }
 
     dispatch({
       type: 'ADD_ACTIVITY',
@@ -158,12 +170,12 @@ export default function FollowupStage() {
                 <table className="w-full text-xs md:text-sm">
                   <thead>
                     <tr className="border-b border-border bg-muted/50">
+                      <th className="text-left py-2 md:py-3 px-2 md:px-4 font-semibold text-foreground">Action</th>
                       {config.pendingColumns.map((col) => (
                         <th key={col} className="text-left py-2 md:py-3 px-2 md:px-4 font-semibold text-foreground">
                           {col}
                         </th>
                       ))}
-                      <th className="text-left py-2 md:py-3 px-2 md:px-4 font-semibold text-foreground">Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -176,14 +188,6 @@ export default function FollowupStage() {
                     ) : (
                       pendingItems.map((item) => (
                       <tr key={item.id} className="border-b border-border hover:bg-muted/30 transition-colors">
-                        {config.pendingColumns.map((col) => {
-                          const cellValue = getColumnValue(item, col);
-                          return (
-                            <td key={col} className="py-2 md:py-3 px-2 md:px-4 text-foreground">
-                              {typeof cellValue === 'boolean' ? (cellValue ? 'Yes' : 'No') : String(cellValue)}
-                            </td>
-                          );
-                        })}
                         <td className="py-2 md:py-3 px-2 md:px-4">
                           <Button
                             onClick={() => {
@@ -196,6 +200,14 @@ export default function FollowupStage() {
                             Update
                           </Button>
                         </td>
+                        {config.pendingColumns.map((col) => {
+                          const cellValue = getColumnValue(item, col);
+                          return (
+                            <td key={col} className="py-2 md:py-3 px-2 md:px-4 text-foreground">
+                              {typeof cellValue === 'boolean' ? (cellValue ? 'Yes' : 'No') : String(cellValue)}
+                            </td>
+                          );
+                        })}
                       </tr>
                     ))
                     )}</tbody>
@@ -213,8 +225,7 @@ export default function FollowupStage() {
                           {col}
                         </th>
                       ))}
-                      <th className="text-left py-2 md:py-3 px-2 md:px-4 font-semibold text-foreground">Status</th>
-                    </tr>
+                      </tr>
                   </thead>
                   <tbody>
                     {historyItems.length === 0 ? (
@@ -234,9 +245,6 @@ export default function FollowupStage() {
                             </td>
                           );
                         })}
-                        <td className="py-2 md:py-3 px-2 md:px-4">
-                          <Badge className="bg-green-100 text-green-800 text-xs">Completed</Badge>
-                        </td>
                       </tr>
                     ))
                     )}</tbody>

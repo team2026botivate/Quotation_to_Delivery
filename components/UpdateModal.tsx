@@ -25,7 +25,6 @@ interface UpdateModalProps {
 
 export default function UpdateModal({ item, stage, config, isOpen, onClose, onSubmit }: UpdateModalProps) {
   const [formData, setFormData] = useState<Record<string, any>>({});
-  const [uploadedFiles, setUploadedFiles] = useState<Record<string, { name: string; url: string }>>({});
   const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const handleInputChange = (name: string, value: any) => {
@@ -33,35 +32,36 @@ export default function UpdateModal({ item, stage, config, isOpen, onClose, onSu
   };
 
   const handleFileUpload = (name: string, event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setUploadedFiles((prev) => ({
-        ...prev,
-        [name]: { name: file.name, url },
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      const currentFiles = formData[name] || [];
+      const remainingSlots = 5 - currentFiles.length;
+      
+      if (remainingSlots <= 0) return;
+
+      const newFiles = Array.from(files).slice(0, remainingSlots).map(file => ({
+        name: file.name,
+        url: URL.createObjectURL(file)
       }));
-      handleInputChange(name, url);
+
+      handleInputChange(name, [...currentFiles, ...newFiles]);
     }
   };
 
-  const removeFile = (name: string) => {
-    setUploadedFiles((prev) => {
-      const updated = { ...prev };
-      delete updated[name];
-      return updated;
-    });
-    handleInputChange(name, null);
+  const removeFile = (name: string, index: number) => {
+    const currentFiles = formData[name] || [];
+    const updatedFiles = currentFiles.filter((_: any, i: number) => i !== index);
+    handleInputChange(name, updatedFiles);
   };
 
   const handleSubmit = () => {
     onSubmit(item, formData);
     setFormData({});
-    setUploadedFiles({});
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle>Update {config.title}</DialogTitle>
           <DialogDescription>
@@ -70,7 +70,13 @@ export default function UpdateModal({ item, stage, config, isOpen, onClose, onSu
         </DialogHeader>
 
         <div className="space-y-6 py-4 max-h-96 overflow-y-auto">
-          {config.formFields.map((field) => (
+          {config.formFields.map((field) => {
+            const isCallDate = field.name === 'callDate';
+            const showCallDate = isCallDate ? formData['status'] === 'need_time' : true;
+
+            if (!showCallDate) return null;
+
+            return (
             <div key={field.name} className="space-y-2">
               <Label htmlFor={field.name} className="text-foreground">
                 {field.label}
@@ -149,12 +155,14 @@ export default function UpdateModal({ item, stage, config, isOpen, onClose, onSu
               )}
 
               {field.type === 'file' && (
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <input
                     ref={(el) => {
                       if (el) fileInputs.current[field.name] = el;
                     }}
                     type="file"
+                    multiple
+                    accept={field.label.toLowerCase().includes('video') ? 'video/*' : 'image/*'}
                     onChange={(e) => handleFileUpload(field.name, e)}
                     className="hidden"
                   />
@@ -162,38 +170,50 @@ export default function UpdateModal({ item, stage, config, isOpen, onClose, onSu
                     type="button"
                     variant="outline"
                     onClick={() => fileInputs.current[field.name]?.click()}
-                    className="w-full border-border"
+                    className="w-full border-border h-12 border-dashed"
+                    disabled={
+                        formData[field.name]?.length >= 5
+                    }
                   >
-                    {uploadedFiles[field.name] ? 'Change File' : 'Choose File'}
+                    {formData[field.name]?.length >= 5 
+                        ? 'Maximum 5 files reached' 
+                        : `Upload ${field.label.includes('Video') ? 'Videos' : 'Images'} (Max 5)`}
                   </Button>
 
-                  {uploadedFiles[field.name] && (
-                    <div className="flex items-center justify-between bg-muted/50 p-3 rounded-lg">
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{uploadedFiles[field.name].name}</p>
-                        {field.type === 'file' && field.label.toLowerCase().includes('image') && (
-                          <img
-                            src={uploadedFiles[field.name].url || "/placeholder.svg"}
-                            alt="preview"
-                            className="mt-2 max-h-48 rounded"
-                          />
-                        )}
-                        {field.type === 'file' && field.label.toLowerCase().includes('video') && (
-                          <video
-                            src={uploadedFiles[field.name].url}
-                            controls
-                            className="mt-2 max-h-48 rounded"
-                          />
-                        )}
-                      </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeFile(field.name)}
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
+                  {/* File Preview Grid */}
+                  {formData[field.name]?.length > 0 && (
+                    <div className="grid grid-cols-5 gap-2">
+                      {formData[field.name].map((file: any, index: number) => (
+                        <div key={index} className="relative group bg-muted/40 rounded-lg p-1.5 border border-border">
+                            {field.label.toLowerCase().includes('video') ? (
+                                <video
+                                    src={file.url}
+                                    controls
+                                    className="w-full h-16 object-cover rounded-md"
+                                />
+                            ) : (
+                                <img
+                                    src={file.url || "/placeholder.svg"}
+                                    alt="preview"
+                                    className="w-full h-16 object-cover rounded-md"
+                                />
+                            )}
+                            <div className="mt-1 flex items-center justify-between">
+                                <span className="text-[10px] text-muted-foreground truncate max-w-[60px]">
+                                    {file.name}
+                                </span>
+                                <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="icon"
+                                    className="h-6 w-6"
+                                    onClick={() => removeFile(field.name, index)}
+                                >
+                                    <X className="w-3 h-3" />
+                                </Button>
+                            </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -214,7 +234,8 @@ export default function UpdateModal({ item, stage, config, isOpen, onClose, onSu
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
 
         <DialogFooter>

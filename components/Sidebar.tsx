@@ -14,6 +14,7 @@ import {
   Users,
   Wrench,
   DollarSign,
+  LogOut,
 } from "lucide-react";
 
 type StageType =
@@ -33,6 +34,7 @@ type StageType =
 interface SidebarProps {
   currentStage: StageType;
   onStageChange: (stage: StageType) => void;
+  onLogout: () => void;
 }
 
 const stages = [
@@ -40,7 +42,7 @@ const stages = [
   { id: "followup", label: "Followup Customer", icon: CheckCircle2 },
   { id: "stock", label: "Check Delivery From Stock", icon: Package },
   { id: "po", label: "Make PO", icon: FileText },
-  { id: "delivery", label: "Truck Delivery", icon: Truck },
+  { id: "delivery", label: "Track Delivery", icon: Truck },
   { id: "receiving", label: "Receiving Stock", icon: Box },
   { id: "dispatch-plan", label: "Dispatch Planning", icon: Calendar },
   { id: "dispatch", label: "Dispatch", icon: Send },
@@ -50,7 +52,7 @@ const stages = [
   { id: "payment", label: "Payment Collection", icon: DollarSign },
 ];
 
-export default function Sidebar({ currentStage, onStageChange }: SidebarProps) {
+export default function Sidebar({ currentStage, onStageChange, onLogout }: SidebarProps) {
   return (
     <div className="hidden md:flex w-64 bg-sidebar border-r border-sidebar-border overflow-y-auto h-screen flex-col">
       <div className="p-6 border-b border-sidebar-border sticky top-0 bg-sidebar">
@@ -86,6 +88,18 @@ export default function Sidebar({ currentStage, onStageChange }: SidebarProps) {
           );
         })}
       </nav>
+      <div className="p-4 border-t border-sidebar-border mt-auto">
+        <Button
+          onClick={onLogout}
+          variant="ghost"
+          className="w-full justify-start gap-3 px-3 py-2.5 h-auto rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
+        >
+          <LogOut className="w-5 h-5 flex-shrink-0" />
+          <span className="text-left text-sm font-medium">
+            Logout
+          </span>
+        </Button>
+      </div>
     </div>
   );
 }
